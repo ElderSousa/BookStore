@@ -1,0 +1,63 @@
+### Arquivos de ajuda e build ###
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### Spring Tool Suite (STS) ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### Visual Studio Code ###
+.vscode/
+
+### Logs e temporários ###
+*.log
+*.tmp
+*.bak
+*.swp
+
+### Sistema operacional ###
+.DS_Store
+Thumbs.db
+
+### Docker ###
+# Ignore arquivos e pastas geradas pelo Docker
+*.pid
+*.seed
+*.pid.lock
+**/docker-compose.override.yml
+**/docker-data/
+**/docker-volume/
+**/docker/*.log
+
+# Ignore imagens e containers salvos localmente
+*.tar
+*.img
+
+# Ignore variáveis de ambiente locais
+.env
+.env.local
+.env.*.local
