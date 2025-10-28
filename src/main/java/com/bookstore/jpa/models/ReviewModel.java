@@ -13,16 +13,16 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "TB_BOOK")
+@Table(name = "TB_REVIEW")
 @Getter
 @Setter
-public class BookModel implements Serializable{
+public class ReviewModel implements Serializable{
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    @Column(nullable = false)
+    private String comment;
 
-    @Column(nullable = false, unique = true)
-    private String title;
 }

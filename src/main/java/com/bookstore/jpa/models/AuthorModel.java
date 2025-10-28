@@ -13,16 +13,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "TB_BOOK")
+@Table(name = "TB_AUTHOR")
 @Getter
 @Setter
-public class BookModel implements Serializable{
-    private static final long serialVersionUID = 1L;
+public class AuthorModel implements Serializable{
+    private final static long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
-
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private UUID Id;
     @Column(nullable = false, unique = true)
-    private String title;
+    private String name;
 }
