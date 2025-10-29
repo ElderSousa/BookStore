@@ -30,7 +30,7 @@ public class PublisherModel implements Serializable{
     private UUID id;
     @Column(nullable = false, unique = true)
     private String name;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)//Evita erros de serialização cíclica
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)//Evita erros de serialização
     @OneToMany(mappedBy = "publisher", fetch = FetchType.LAZY)
     private Set<BookModel> books = new HashSet<>();
 }
