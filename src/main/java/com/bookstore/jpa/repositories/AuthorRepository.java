@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AuthorRepository extends JpaRepository<AuthorRepository, UUID> {
+import com.bookstore.jpa.models.AuthorModel;
+
+public interface AuthorRepository extends JpaRepository<AuthorModel, UUID> {
 
 }
