@@ -63,5 +63,5 @@ Thumbs.db
 .env.*.local
 
 # Ignore arquivos de dados sensíveis
-.application-dev.properties
-.application.properties
+application.properties
+application-*.properties
