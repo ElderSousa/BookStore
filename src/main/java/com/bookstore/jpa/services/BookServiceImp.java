@@ -1,12 +1,14 @@
 package com.bookstore.jpa.services;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.bookstore.jpa.dtos.BookRecordDto;
+import com.bookstore.jpa.models.AuthorModel;
 import com.bookstore.jpa.models.BookModel;
 import com.bookstore.jpa.models.ReviewModel;
 import com.bookstore.jpa.repositories.AuthorRepository;
@@ -14,6 +16,7 @@ import com.bookstore.jpa.repositories.BookRepository;
 import com.bookstore.jpa.repositories.PublisherRepository;
 import com.bookstore.jpa.services.interfaces.BookService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -35,10 +38,18 @@ public class BookServiceImp implements BookService{
         
         var book = new BookModel();
         book.setTitle(bookRecordDto.title());
-        book.setPublisher(publisherRepository.findById(bookRecordDto.publisherId()).get());
-        book.setAuthors(authorRepository.findAllById(bookRecordDto.authorIds())
-        .stream()
-        .collect(Collectors.toSet()));
+        book.setPublisher(publisherRepository.findById(bookRecordDto.publisherId())
+        .orElseThrow(()-> new EntityNotFoundException("Editora com o ID" + bookRecordDto.publisherId() +
+        "não encontrada.")));
+
+        Set<UUID> authorIds = bookRecordDto.authorIds(); 
+        Set<AuthorModel> authors = new HashSet<>(authorRepository.findAllById(authorIds));
+        
+        if (authors.size() != authorIds.size()){
+            throw new EntityNotFoundException("Um ou mais Ids de autores não foram encontrados.");
+        }
+
+        book.setAuthors(authors);
 
         var review = new ReviewModel();
         review.setComment(bookRecordDto.reviewComment());
@@ -56,6 +67,11 @@ public class BookServiceImp implements BookService{
     @Transactional // Será feita uma deleção em cascata
     @Override
     public void deleteBook(UUID id) {
+
+        if(!bookRepository.existsById(id)){
+            throw new EntityNotFoundException("Livro com o ID " + id + " não encontrado.");
+        }
+       
         bookRepository.deleteById(id);
     }
 }

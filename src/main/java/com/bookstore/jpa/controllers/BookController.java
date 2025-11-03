@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bookstore.jpa.dtos.BookRecordDto;
 import com.bookstore.jpa.models.BookModel;
 import com.bookstore.jpa.services.BookServiceImp;
+import com.bookstore.jpa.services.interfaces.BookService;
+
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,14 +26,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("bookstore/books")
 public class BookController {
 
-    private final BookServiceImp bookService;
+    private final BookService bookService;
 
-    public BookController(BookServiceImp bookService) {
+    public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
     @PostMapping
-    public ResponseEntity<BookModel> saveBook(@RequestBody BookRecordDto bookRecordDto) {
+    public ResponseEntity<BookModel> saveBook(@RequestBody @Valid BookRecordDto bookRecordDto) {
         
         return ResponseEntity.status(HttpStatus.CREATED).body(bookService.SaveBook(bookRecordDto));
     }
