@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bookstore.jpa.dtos.BookRecordDto;
-import com.bookstore.jpa.models.BookModel;
+import com.bookstore.jpa.dtos.Responses.BookResponseDto;
 
 public interface BookService {
 
-    BookModel SaveBook(BookRecordDto bookRecordDto);
-    List<BookModel> getAllBooks();
+    BookResponseDto SaveBook(BookRecordDto bookRecordDto);
+    List<BookResponseDto> getAllBooks();
     void deleteBook(UUID id);
 }

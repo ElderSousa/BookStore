@@ -13,13 +13,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+
 
 @Entity
 @Table(name = "TB_REVIEW")
-@Getter
-@Setter
 public class ReviewModel implements Serializable{
     private static final long serialVersionUID = 1L;
 
@@ -33,5 +30,31 @@ public class ReviewModel implements Serializable{
     @OneToOne
     @JoinColumn(name  = "book_id")
     private BookModel book;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public BookModel getBook() {
+        return book;
+    }
+
+    public void setBook(BookModel book) {
+        this.book = book;
+    }
+
+    
 
 }

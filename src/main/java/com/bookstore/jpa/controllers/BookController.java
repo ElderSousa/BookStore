@@ -4,8 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookstore.jpa.dtos.BookRecordDto;
-import com.bookstore.jpa.models.BookModel;
-import com.bookstore.jpa.services.BookServiceImp;
+import com.bookstore.jpa.dtos.Responses.BookResponseDto;
 import com.bookstore.jpa.services.interfaces.BookService;
 
 import jakarta.validation.Valid;
@@ -33,13 +32,13 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<BookModel> saveBook(@RequestBody @Valid BookRecordDto bookRecordDto) {
+    public ResponseEntity<BookResponseDto> saveBook(@RequestBody @Valid BookRecordDto bookRecordDto) {
         
         return ResponseEntity.status(HttpStatus.CREATED).body(bookService.SaveBook(bookRecordDto));
     }
 
     @GetMapping
-    public ResponseEntity<List<BookModel>> getAllBooks() {
+    public ResponseEntity<List<BookResponseDto>> getAllBooks() {
         return ResponseEntity.status(HttpStatus.OK).body(bookService.getAllBooks());
     }
 

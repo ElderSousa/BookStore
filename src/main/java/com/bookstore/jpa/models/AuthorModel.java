@@ -15,13 +15,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "TB_AUTHOR")
-@Getter
-@Setter
 public class AuthorModel implements Serializable{
     private final static long serialVersionUID = 1L;
 
@@ -34,4 +30,31 @@ public class AuthorModel implements Serializable{
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY)
     private Set<BookModel> books = new HashSet<>();
+
+  
+    public UUID getId() {
+        return Id;
+    }
+
+    public void setId(UUID id) {
+        Id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Set<BookModel> getBooks() {
+        return books;
+    }
+
+    public void setBooks(Set<BookModel> books) {
+        this.books = books;
+    }
+
+    
 }

@@ -17,13 +17,12 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+
+
 
 @Entity
 @Table(name = "TB_BOOK")
-@Getter
-@Setter
+
 public class BookModel implements Serializable{
     private static final long serialVersionUID = 1L;
 
@@ -49,5 +48,46 @@ public class BookModel implements Serializable{
 
     @OneToOne(mappedBy = "book", cascade = CascadeType.ALL)
     private ReviewModel review;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public PublisherModel getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(PublisherModel publisher) {
+        this.publisher = publisher;
+    }
+
+    public Set<AuthorModel> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(Set<AuthorModel> authors) {
+        this.authors = authors;
+    }
+
+    public ReviewModel getReview() {
+        return review;
+    }
+
+    public void setReview(ReviewModel review) {
+        this.review = review;
+    }
         
+    
 }

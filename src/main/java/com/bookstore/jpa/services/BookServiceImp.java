@@ -3,11 +3,14 @@ package com.bookstore.jpa.services;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.bookstore.jpa.Mappings.BookMapper;
 import com.bookstore.jpa.dtos.BookRecordDto;
+import com.bookstore.jpa.dtos.Responses.BookResponseDto;
 import com.bookstore.jpa.models.AuthorModel;
 import com.bookstore.jpa.models.BookModel;
 import com.bookstore.jpa.models.ReviewModel;
@@ -25,16 +28,18 @@ public class BookServiceImp implements BookService{
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
+    private final BookMapper bookMapper;
 
-    public BookServiceImp(BookRepository bookRepository, AuthorRepository authorRepository, PublisherRepository publisherRepository) {
+    public BookServiceImp(BookRepository bookRepository, AuthorRepository authorRepository, PublisherRepository publisherRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.publisherRepository = publisherRepository;
+        this.bookMapper = bookMapper;
     }
 
     @Transactional
     @Override
-    public BookModel SaveBook(BookRecordDto bookRecordDto) {
+    public BookResponseDto SaveBook(BookRecordDto bookRecordDto) {
         
         var book = new BookModel();
         book.setTitle(bookRecordDto.title());
@@ -56,12 +61,17 @@ public class BookServiceImp implements BookService{
         review.setBook(book);
         book.setReview(review);
 
-        return bookRepository.save(book);
+        var bookModel = bookRepository.save(book);
+        
+        return bookMapper.toDto(bookModel);
     }
 
     @Override
-    public List<BookModel> getAllBooks() {
-        return bookRepository.findAll();
+    public List<BookResponseDto> getAllBooks() {
+        return bookRepository.findAll()
+            .stream()
+            .map(bookMapper::toDto)
+            .collect(Collectors.toList());
     }
 
     @Transactional // Será feita uma deleção em cascata
