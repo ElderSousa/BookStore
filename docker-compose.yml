@@ -1,19 +1,33 @@
 services:
-
   db:
     image: postgres:15-alpine
     container_name: jpa-db
     ports:
       - "5432:5432"
     environment:
-       - POSTGRES_USER=postgres
-       - POSTGRES_PASSWORD=postgres
+       - POSTGRES_USER=${DB_USER}
+       - POSTGRES_PASSWORD=${DB_PASSWORD}
        - POSTGRES_DB=bookstore-jpa
     volumes:
         - postgres-data:/var/lib/postgresql/data
     networks:
       - jpaapi-networks
-    
+
+  app: 
+    build: .
+    container_name: jpa-api
+    ports:
+      - "8080:8080"
+    networks:
+      - jpaapi-networks
+    depends_on:
+      - db
+    environment:
+       - SPRING_PROFILES_ACTIVE=prod
+       - DB_JDBC_URL=jdbc:postgresql://jpa-db:5432/bookstore-jpa
+       - DB_USERNAME=${DB_USER}
+       - DB_PASSWORD=${DB_PASSWORD}
+
 volumes:
   postgres-data:
 
