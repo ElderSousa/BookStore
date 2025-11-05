@@ -22,6 +22,9 @@ import com.bookstore.jpa.services.interfaces.BookService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class BookServiceImp implements BookService{
 
@@ -29,6 +32,7 @@ public class BookServiceImp implements BookService{
     private final AuthorRepository authorRepository;
     private final PublisherRepository publisherRepository;
     private final BookMapper bookMapper;
+    private static final Logger log = LoggerFactory.getLogger(BookServiceImp.class);
 
     public BookServiceImp(BookRepository bookRepository, AuthorRepository authorRepository, PublisherRepository publisherRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
@@ -41,6 +45,8 @@ public class BookServiceImp implements BookService{
     @Override
     public BookResponseDto SaveBook(BookRecordDto bookRecordDto) {
         
+        log.info("Inciando tentativa de salvar livroc com titulo: {}", bookRecordDto.title());
+
         var book = new BookModel();
         book.setTitle(bookRecordDto.title());
         book.setPublisher(publisherRepository.findById(bookRecordDto.publisherId())
@@ -61,14 +67,23 @@ public class BookServiceImp implements BookService{
         review.setBook(book);
         book.setReview(review);
 
-        var bookModel = bookRepository.save(book);
-        
-        return bookMapper.toDto(bookModel);
+        var savedBook = bookRepository.save(book);
+
+        log.info("Livro salvo com sucesso com o ID: {}", savedBook.getId());
+    
+        return bookMapper.toDto(savedBook);
     }
 
     @Override
     public List<BookResponseDto> getAllBooks() {
-        return bookRepository.findAll()
+
+        log.info("iniciando busca por todos os livros...");
+
+        List<BookModel> books = bookRepository.findAll();
+
+        log.info("Encontrados {} livros.", books.size());
+
+        return books
             .stream()
             .map(bookMapper::toDto)
             .collect(Collectors.toList());
@@ -78,10 +93,14 @@ public class BookServiceImp implements BookService{
     @Override
     public void deleteBook(UUID id) {
 
+        log.info("Iniciando tentativa de exclusão do livro com ID: {}", id);
+
         if(!bookRepository.existsById(id)){
             throw new EntityNotFoundException("Livro com o ID " + id + " não encontrado.");
         }
        
         bookRepository.deleteById(id);
+
+        log.info("Livro com ID: {} excluído com sucesso.", id, id);
     }
 }

@@ -11,8 +11,8 @@ public class SpringDocConfig {
      @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
-                .info(new Info().title("MS-userApi - Sistema de gerencimento de usuários")
-                        .description("API REST para gerenciamento usuários.")
+                .info(new Info().title("BookStore - Sistema de gerenciamento de livros")
+                        .description("API REST para gerenciamento livros.")
                         .version("v1.0.0"));
     }
 }
