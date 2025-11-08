@@ -8,11 +8,11 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.bookstore.jpa.Mappings.BookMapper;
-import com.bookstore.jpa.dtos.BookRecordDto;
-import com.bookstore.jpa.dtos.Responses.BookResponseDto;
+import com.bookstore.jpa.dtos.records.Responses.BookResponse;
+import com.bookstore.jpa.exceptions.BusinessRuleException;
 import com.bookstore.jpa.models.AuthorModel;
 import com.bookstore.jpa.models.BookModel;
+import com.bookstore.jpa.models.PublisherModel;
 import com.bookstore.jpa.models.ReviewModel;
 import com.bookstore.jpa.repositories.AuthorRepository;
 import com.bookstore.jpa.repositories.BookRepository;
@@ -24,6 +24,12 @@ import jakarta.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.bookstore.jpa.Mappings.interfaces.BookMapper;
+import com.bookstore.jpa.dtos.records.Requests.AuthorAssociationRequest;
+import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookCreateRequest;
+import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookUpdateRequest;
+import com.bookstore.jpa.exceptions.ResourceAlreadyExistsException;
 
 @Service
 public class BookServiceImp implements BookService{
@@ -43,17 +49,17 @@ public class BookServiceImp implements BookService{
 
     @Transactional
     @Override
-    public BookResponseDto SaveBook(BookRecordDto bookRecordDto) {
+    public BookResponse saveBook(BookCreateRequest bookRequest) {
         
-        log.info("Inciando tentativa de salvar livroc com titulo: {}", bookRecordDto.title());
+        log.info("Inciando tentativa de salvar livroc com titulo: {}", bookRequest.title());
 
         var book = new BookModel();
-        book.setTitle(bookRecordDto.title());
-        book.setPublisher(publisherRepository.findById(bookRecordDto.publisherId())
-        .orElseThrow(()-> new EntityNotFoundException("Editora com o ID" + bookRecordDto.publisherId() +
+        book.setTitle(bookRequest.title());
+        book.setPublisher(publisherRepository.findById(bookRequest.publisherId())
+        .orElseThrow(()-> new EntityNotFoundException("Editora com o ID" + bookRequest.publisherId() +
         "não encontrada.")));
 
-        Set<UUID> authorIds = bookRecordDto.authorIds(); 
+        Set<UUID> authorIds = bookRequest.authorIds(); 
         Set<AuthorModel> authors = new HashSet<>(authorRepository.findAllById(authorIds));
         
         if (authors.size() != authorIds.size()){
@@ -63,7 +69,7 @@ public class BookServiceImp implements BookService{
         book.setAuthors(authors);
 
         var review = new ReviewModel();
-        review.setComment(bookRecordDto.reviewComment());
+        review.setComment(bookRequest.reviewComment());
         review.setBook(book);
         book.setReview(review);
 
@@ -75,9 +81,9 @@ public class BookServiceImp implements BookService{
     }
 
     @Override
-    public List<BookResponseDto> getAllBooks() {
+    public List<BookResponse> getAllBooks() {
 
-        log.info("iniciando busca por todos os livros...");
+        log.info("Iniciando busca por todos os livros...");
 
         List<BookModel> books = bookRepository.findAll();
 
@@ -87,6 +93,46 @@ public class BookServiceImp implements BookService{
             .stream()
             .map(bookMapper::toDto)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public BookResponse getBookById(UUID id){
+        log.info("Iniciando busca por Livro com ID: {}", id);
+
+        var book = bookRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + id + " não encontrado."));
+        
+        log.info("Encontrado Livro com ID: {}", id);
+        
+        return bookMapper.toDto(book);
+    }
+
+    @Transactional
+    @Override
+    public BookResponse updateBook(UUID id, BookUpdateRequest bookRequest) {
+        
+        log.info("Iniciando tentativa de atualização do livro com ID: {}", id);
+        BookModel book = bookRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + id + " não encontrado."));
+        
+        if (bookRequest.title() != null && !bookRequest.title().isBlank()) {
+            book.setTitle(bookRequest.title());
+        }
+
+        if (bookRequest.publisherId() != null) {
+            PublisherModel publisher = publisherRepository.findById(bookRequest.publisherId())
+                .orElseThrow(() -> new EntityNotFoundException("Editora com o ID " + bookRequest.publisherId() + " não encontrada."));
+            book.setPublisher(publisher);
+        }
+
+        if (bookRequest.reviewComment() != null && !bookRequest.reviewComment().isBlank()) {
+            book.getReview().setComment(bookRequest.reviewComment());
+        }
+
+        var updatedBook = bookRepository.save(book);
+        log.info("Livro com ID: {} atualizado com sucesso.", id);
+        return bookMapper.toDto(updatedBook);
+        
     }
 
     @Transactional // Será feita uma deleção em cascata
@@ -102,5 +148,51 @@ public class BookServiceImp implements BookService{
         bookRepository.deleteById(id);
 
         log.info("Livro com ID: {} excluído com sucesso.", id, id);
+    }
+
+    @Transactional
+    @Override
+    public void removeAuthorFromBook(UUID bookId, AuthorAssociationRequest authorAssociation){
+        log.info("Iniciando tentativa de remoção do autor com ID: {} do livro com ID: {}", authorAssociation.authorId(), bookId);
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + bookId + " não encontrado."));
+        
+        var author = authorRepository.findById(authorAssociation.authorId())
+            .orElseThrow(() -> new EntityNotFoundException("Autor com o ID " + authorAssociation.authorId() + " não encontrado."));
+
+        if (book.getAuthors().size() <=1){
+            throw new BusinessRuleException("Um livro deve ter pelo menos um autor associado.");
+        }
+
+        if (book.getAuthors().remove(author)) {
+            bookRepository.save(book);
+            log.info("Autor removido com sucesso.");
+        } else {
+            log.warn("Autor {} não estava associado ao livro {}.", authorAssociation.authorId(), bookId);
+        }
+
+    }
+    
+    @Transactional
+    @Override
+    public void addAuthorToBook(UUID bookId, AuthorAssociationRequest authorAssociation){
+        log.info("Iniciando a tentativa de adicionar o author de ID: {} no livro de ID: {}", bookId, authorAssociation.authorId());
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + bookId + " não encontrado."));
+
+        var author = authorRepository.findById(authorAssociation.authorId())
+            .orElseThrow(() -> new EntityNotFoundException("Autor com o ID " + authorAssociation.authorId() + " não encontrado."));
+        
+        if (book.getAuthors().contains(author)){
+            log.warn("Author do ID: {} já está associado ao Livro do ID: {}", authorAssociation.authorId(), bookId );
+            throw new ResourceAlreadyExistsException("Author do ID: " + authorAssociation.authorId() + "ja está associado ao Livro do ID: " + bookId + "");
+        }
+
+        book.getAuthors().add(author);
+        bookRepository.save(book);
+        
+        log.info("Autor adicionado com sucesso ao livro.");
     }
 }

@@ -1,6 +1,7 @@
 package com.bookstore.jpa.services;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,11 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.bookstore.jpa.Mappings.BookMapper;
-import com.bookstore.jpa.dtos.BookRecordDto;
-import com.bookstore.jpa.dtos.Responses.BookResponseDto;
+import com.bookstore.jpa.dtos.records.Requests.BookCreateRequest;
+import com.bookstore.jpa.dtos.records.Responses.BookResponse;
 import com.bookstore.jpa.models.AuthorModel;
 import com.bookstore.jpa.models.BookModel;
 import com.bookstore.jpa.models.PublisherModel;
@@ -47,12 +50,12 @@ public class BookServiceImpTest {
     @InjectMocks
     private BookServiceImp bookServiceImp;
 
-    private BookRecordDto bookRecordDto;
+    private BookCreateRequest bookRecordDto;
     private PublisherModel publisherModel;
     private Set<AuthorModel> authorModels;
     private List<AuthorModel> authorList;
     private BookModel savedBook;
-    private BookResponseDto bookResponseDto;
+    private BookResponse bookResponseDto;
 
     @BeforeEach
     void setUp(){
@@ -61,7 +64,7 @@ public class BookServiceImpTest {
         UUID authorId = UUID.randomUUID();
         UUID bookId = UUID.randomUUID();
 
-        bookRecordDto = new BookRecordDto(
+        bookRecordDto = new BookCreateRequest(
             "O Senhor dos Anéis", 
             publisherId, 
             Set.of(authorId), 
@@ -86,7 +89,7 @@ public class BookServiceImpTest {
         savedBook.setPublisher(publisherModel);
         savedBook.setAuthors(authorModels);
 
-        bookResponseDto = new BookResponseDto(
+        bookResponseDto = new BookResponse(
                     bookId, 
                     bookRecordDto.title(), 
                     null,
@@ -112,7 +115,7 @@ public class BookServiceImpTest {
             .thenReturn(bookResponseDto);
 
         //When(Act)
-        BookResponseDto result = bookServiceImp.SaveBook(bookRecordDto);
+        BookResponse result = bookServiceImp.SaveBook(bookRecordDto);
 
         //Then(Assert)
         assertThat(result).isNotNull();
@@ -132,7 +135,7 @@ public class BookServiceImpTest {
         when(publisherRepository.findById(bookRecordDto.publisherId()))
             .thenReturn(Optional.empty());
         
-        //When & 3. Then (Quando e Então)
+        //When & 3. Then
         EntityNotFoundException exception = assertThrows(
             EntityNotFoundException.class,
             () -> {
@@ -140,6 +143,111 @@ public class BookServiceImpTest {
             }
         );
 
+        assertThat(exception.getMessage()).contains("Editora com o ID" + bookRecordDto.publisherId() +
+        "não encontrada.");
+
+        verify(bookRepository, never()).save(any(BookModel.class));
+
     }
-    
+
+    @Test
+    void SaveBook_QuandoAuthorIdNaoEncontrado_DeveLancarEntityNotFoundException() {
+
+        //Given(Arrange)
+
+        when(publisherRepository.findById(bookRecordDto.publisherId()))
+            .thenReturn(Optional.of(publisherModel));
+
+        when(authorRepository.findAllById(bookRecordDto.authorIds()))
+            .thenReturn(new ArrayList<>());
+
+        //When & Then
+        EntityNotFoundException exception = assertThrows(
+            EntityNotFoundException.class,
+            () ->{
+                bookServiceImp.SaveBook(bookRecordDto);
+            }
+        );
+
+        assertThat(exception.getMessage()).contains("Um ou mais Ids de autores não foram encontrados.");
+
+        verify(bookRepository, never()).save(any(BookModel.class));
+    }
+          
+    @Test
+    void getAllBooks_QuandoExistiremLivros_DeveRetornarListaDeBookResponseDto(){
+
+        //Given(Arrange)
+        List<BookModel> bookModels = List.of(savedBook);
+
+        when(bookRepository.findAll())
+            .thenReturn(bookModels);
+
+        when(bookMapper.toDto(savedBook))
+            .thenReturn(bookResponseDto);
+
+        //When(Act) 
+        List<BookResponse> booksResponse = bookServiceImp.getAllBooks();
+
+        //Then(Assert)
+        assertThat(booksResponse).isNotNull();
+        assertThat(booksResponse).hasSize(1);
+        assertThat(booksResponse.get(0).id()).isEqualTo(bookResponseDto.id());    
+    }
+
+    @Test 
+    void getAllBooks_QuandoNaoExistemLivros_DeveRetornarListaVazia(){
+
+        //Given(Arrange)
+        when(bookRepository.findAll())
+            .thenReturn(List.of());
+
+        //When(Act)
+        List<BookResponse> booksResponse = bookServiceImp.getAllBooks();
+
+        //Then(Assert)
+        assertThat(booksResponse).isNotNull();
+        assertThat(booksResponse).isEmpty();
+
+        verify(bookMapper, never()).toDto(any(BookModel.class));
+    }
+
+    @Test
+    void deleteBook_QuandoIdExistente_DeveChamarDeleteById(){
+
+        //Given(Arrange)
+        UUID bookId = savedBook.getId();
+
+        when(bookRepository.existsById(bookId))
+            .thenReturn(true);
+
+        doNothing().when(bookRepository).deleteById(bookId);
+
+        //When & Then(Act & Assert)
+        assertDoesNotThrow(() -> bookServiceImp.deleteBook(bookId));
+
+        verify(bookRepository).existsById(bookId);
+        verify(bookRepository).deleteById(bookId);
+   
+    }
+
+    @Test
+    void deleteBook_QuandoIdNaoExistente_DeveLancarEntityNotFoundException(){
+
+        //Given(Arrange)
+        UUID bookId = savedBook.getId();
+
+        when(bookRepository.existsById(bookId))
+            .thenReturn(false);
+
+        //When & Then(Act & Assert)
+        EntityNotFoundException exception = assertThrows(
+            EntityNotFoundException.class,
+            () -> {
+                bookServiceImp.deleteBook(bookId);
+            }
+        );
+      
+        assertThat(exception.getMessage()).contains("Livro com o ID " + bookId + " não encontrado.");
+    }
 }
