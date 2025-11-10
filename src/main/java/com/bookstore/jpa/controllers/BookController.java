@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.bookstore.jpa.dtos.records.Requests.AuthorAssociationRequest;
-import com.bookstore.jpa.dtos.records.Requests.BookRequest;
 import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookCreateRequest;
 import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookUpdateRequest;
 
@@ -53,8 +52,7 @@ public class BookController {
                  content = @Content(schema = @Schema(implementation = Map.class)))
     })
     @PostMapping
-    public ResponseEntity<BookResponse> saveBook(@RequestBody @Valid BookCreateRequest bookRecordDto) {
-        
+    public ResponseEntity<BookResponse> saveBook(@RequestBody @Valid BookCreateRequest bookRecordDto) {    
         return ResponseEntity.status(HttpStatus.CREATED).body(bookService.saveBook(bookRecordDto));
     }
 
@@ -64,8 +62,7 @@ public class BookController {
     @ApiResponse(responseCode = "200", description = "Lista de livros devolvida com sucesso")
     })
     @GetMapping
-    public ResponseEntity<List<BookResponse>> getAllBooks() {
-        
+    public ResponseEntity<List<BookResponse>> getAllBooks() {       
         return ResponseEntity.status(HttpStatus.OK).body(bookService.getAllBooks());
     }
 
@@ -101,8 +98,7 @@ public class BookController {
                  content = @Content(schema = @Schema(implementation = Map.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteBook(@PathVariable UUID id){
-        
+    public ResponseEntity<String> deleteBook(@PathVariable UUID id){      
         bookService.deleteBook(id);
         return ResponseEntity.status(HttpStatus.OK).body("Book deleted successfully.");
     }
@@ -129,12 +125,11 @@ public class BookController {
                      content = @Content(schema = @Schema(implementation = Map.class))),
         @ApiResponse(responseCode = "404", description = "Livro ou Autor não encontrado")
     })
-    @DeleteMapping("/{bookId}/author/{authroId}")
+    @DeleteMapping("/{bookId}/author/{authorId}")
     public ResponseEntity<Void> removeAuthorFromBook(
             @PathVariable UUID bookId, 
-            @PathVariable AuthorAssociationRequest author) {
-        
+            @PathVariable AuthorAssociationRequest author) {       
         bookService.removeAuthorFromBook(bookId, author);
-        return ResponseEntity.ok().build(); // Retorna 200 OK (Vazio)
+        return ResponseEntity.ok().build();
     }
 }
