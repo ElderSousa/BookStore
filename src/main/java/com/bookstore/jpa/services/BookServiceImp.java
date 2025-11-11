@@ -2,14 +2,21 @@ package com.bookstore.jpa.services;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.bookstore.jpa.Mappings.interfaces.BookMapper;
+import com.bookstore.jpa.dtos.records.Requests.AuthorAssociationRequest;
+import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookCreateRequest;
+import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookUpdateRequest;
 import com.bookstore.jpa.dtos.records.Responses.BookResponse;
 import com.bookstore.jpa.exceptions.BusinessRuleException;
+import com.bookstore.jpa.exceptions.ResourceAlreadyExistsException;
 import com.bookstore.jpa.models.AuthorModel;
 import com.bookstore.jpa.models.BookModel;
 import com.bookstore.jpa.models.PublisherModel;
@@ -22,16 +29,8 @@ import com.bookstore.jpa.services.interfaces.BookService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.bookstore.jpa.Mappings.interfaces.BookMapper;
-import com.bookstore.jpa.dtos.records.Requests.AuthorAssociationRequest;
-import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookCreateRequest;
-import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookUpdateRequest;
-import com.bookstore.jpa.exceptions.ResourceAlreadyExistsException;
-
 @Service
+@SuppressWarnings("null")
 public class BookServiceImp implements BookService{
 
     private final BookRepository bookRepository;

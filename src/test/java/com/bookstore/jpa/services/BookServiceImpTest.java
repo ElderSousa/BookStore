@@ -29,6 +29,7 @@ import com.bookstore.jpa.dtos.records.Requests.AuthorAssociationRequest;
 import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookCreateRequest;
 import com.bookstore.jpa.dtos.records.Requests.BookRequest.BookUpdateRequest;
 import com.bookstore.jpa.dtos.records.Responses.BookResponse;
+import com.bookstore.jpa.exceptions.BusinessRuleException;
 import com.bookstore.jpa.exceptions.ResourceAlreadyExistsException;
 import com.bookstore.jpa.models.AuthorModel;
 import com.bookstore.jpa.models.BookModel;
@@ -41,6 +42,7 @@ import com.bookstore.jpa.repositories.PublisherRepository;
 import jakarta.persistence.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 public class BookServiceImpTest {
 
     @Mock
@@ -390,6 +392,33 @@ public class BookServiceImpTest {
         //When/Then(Act/Assert)
         assertThrows(ResourceAlreadyExistsException.class, ()-> {
             bookServiceImp.addAuthorToBook(bookId, authorRequest);
+        });
+
+        verify(bookRepository, never()).save(any(BookModel.class));
+    }
+
+    @Test
+    void removerAuthorFromBook_QuandoUnicoAutor_DeveLancarBusinessRuleException(){
+        //Given(Arrange)
+        var bookId = UUID.randomUUID();
+        var author = new AuthorAssociationRequest(UUID.randomUUID());
+
+        var unicoAuthor = new AuthorModel();
+        unicoAuthor.setId(author.authorId());
+
+        var book = new BookModel();
+        book.setId(bookId);
+        book.setAuthors(new HashSet<>(Set.of(unicoAuthor)));
+
+        when(bookRepository.findById(bookId))
+            .thenReturn(Optional.of(book));
+
+        when(authorRepository.findById(unicoAuthor.getId()))
+            .thenReturn(Optional.of(unicoAuthor));
+
+        //When/Then(Act/Assert)
+        assertThrows(BusinessRuleException.class, () ->{
+            bookServiceImp.removeAuthorFromBook(bookId, author);
         });
 
         verify(bookRepository, never()).save(any(BookModel.class));
