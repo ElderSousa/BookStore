@@ -55,8 +55,8 @@ public class BookServiceImp implements BookService{
         var book = new BookModel();
         book.setTitle(bookRequest.title());
         book.setPublisher(publisherRepository.findById(bookRequest.publisherId())
-        .orElseThrow(()-> new EntityNotFoundException("Editora com o ID" + bookRequest.publisherId() +
-        "não encontrada.")));
+        .orElseThrow(()-> new EntityNotFoundException("Editora com o ID: " + bookRequest.publisherId() +
+        " não encontrada.")));
 
         Set<UUID> authorIds = bookRequest.authorIds(); 
         Set<AuthorModel> authors = new HashSet<>(authorRepository.findAllById(authorIds));
@@ -75,7 +75,7 @@ public class BookServiceImp implements BookService{
         var savedBook = bookRepository.save(book);
 
         log.info("Livro salvo com sucesso com o ID: {}", savedBook.getId());
-    
+        
         return bookMapper.toDto(savedBook);
     }
 
@@ -99,7 +99,7 @@ public class BookServiceImp implements BookService{
         log.info("Iniciando busca por Livro com ID: {}", id);
 
         var book = bookRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + id + " não encontrado."));
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID: " + id + " não encontrado."));
         
         log.info("Encontrado Livro com ID: {}", id);
         
@@ -112,7 +112,7 @@ public class BookServiceImp implements BookService{
         
         log.info("Iniciando tentativa de atualização do livro com ID: {}", id);
         BookModel book = bookRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + id + " não encontrado."));
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID: " + id + " não encontrado."));
         
         if (bookRequest.title() != null && !bookRequest.title().isBlank()) {
             book.setTitle(bookRequest.title());
@@ -120,13 +120,13 @@ public class BookServiceImp implements BookService{
 
         if (bookRequest.publisherId() != null) {
             PublisherModel publisher = publisherRepository.findById(bookRequest.publisherId())
-                .orElseThrow(() -> new EntityNotFoundException("Editora com o ID " + bookRequest.publisherId() + " não encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Editora com o ID: " + bookRequest.publisherId() + " não encontrada."));
             book.setPublisher(publisher);
         }
 
         if (bookRequest.reviewComment() != null && !bookRequest.reviewComment().isBlank()) {
             book.getReview().setComment(bookRequest.reviewComment());
-        }
+        }  
 
         var updatedBook = bookRepository.save(book);
         log.info("Livro com ID: {} atualizado com sucesso.", id);
@@ -141,7 +141,7 @@ public class BookServiceImp implements BookService{
         log.info("Iniciando tentativa de exclusão do livro com ID: {}", id);
 
         if(!bookRepository.existsById(id)){
-            throw new EntityNotFoundException("Livro com o ID " + id + " não encontrado.");
+            throw new EntityNotFoundException("Livro com o ID: " + id + " não encontrado.");
         }
        
         bookRepository.deleteById(id);
@@ -155,10 +155,10 @@ public class BookServiceImp implements BookService{
         log.info("Iniciando tentativa de remoção do autor com ID: {} do livro com ID: {}", authorAssociation.authorId(), bookId);
 
         var book = bookRepository.findById(bookId)
-            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + bookId + " não encontrado."));
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID: " + bookId + " não encontrado."));
         
         var author = authorRepository.findById(authorAssociation.authorId())
-            .orElseThrow(() -> new EntityNotFoundException("Autor com o ID " + authorAssociation.authorId() + " não encontrado."));
+            .orElseThrow(() -> new EntityNotFoundException("Autor com o ID: " + authorAssociation.authorId() + " não encontrado."));
 
         if (book.getAuthors().size() <=1){
             throw new BusinessRuleException("Um livro deve ter pelo menos um autor associado.");
@@ -179,10 +179,10 @@ public class BookServiceImp implements BookService{
         log.info("Iniciando a tentativa de adicionar o author de ID: {} no livro de ID: {}", bookId, authorAssociation.authorId());
 
         var book = bookRepository.findById(bookId)
-            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID " + bookId + " não encontrado."));
+            .orElseThrow(() -> new EntityNotFoundException("Livro com o ID: " + bookId + " não encontrado."));
 
         var author = authorRepository.findById(authorAssociation.authorId())
-            .orElseThrow(() -> new EntityNotFoundException("Autor com o ID " + authorAssociation.authorId() + " não encontrado."));
+            .orElseThrow(() -> new EntityNotFoundException("Autor com o ID: " + authorAssociation.authorId() + " não encontrado."));
         
         if (book.getAuthors().contains(author)){
             log.warn("Author do ID: {} já está associado ao Livro do ID: {}", authorAssociation.authorId(), bookId );

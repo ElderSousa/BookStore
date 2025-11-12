@@ -7,7 +7,7 @@ public record BookResponse(
         UUID id,
         String title,
         PublisherResponse publisher,
-        Set<AuthorResponse> author,
+        Set<AuthorResponse> authors,
         ReviewResponse review
     ){
 
