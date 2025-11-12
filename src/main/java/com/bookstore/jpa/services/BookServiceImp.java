@@ -50,7 +50,7 @@ public class BookServiceImp implements BookService{
     @Override
     public BookResponse saveBook(BookCreateRequest bookRequest) {
         
-        log.info("Inciando tentativa de salvar livroc com titulo: {}", bookRequest.title());
+        log.info("Inciando tentativa de salvar livro com titulo: {}", bookRequest.title());
 
         var book = new BookModel();
         book.setTitle(bookRequest.title());
@@ -74,7 +74,7 @@ public class BookServiceImp implements BookService{
 
         var savedBook = bookRepository.save(book);
 
-        log.info("Livro salvo com sucesso com o ID: {}", savedBook.getId());
+        log.info("Livro com o ID: {} salvo com sucesso", savedBook.getId());
         
         return bookMapper.toDto(savedBook);
     }
