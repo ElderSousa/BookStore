@@ -1,5 +1,6 @@
 package com.bookstore.jpa.controllers;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,6 +44,16 @@ public class PublisherController {
     @PostMapping
     public ResponseEntity<PublisherResponse> savePublisher(@RequestBody @Valid PublisherCreateRequest publisherRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(publisherService.savePublisher(publisherRequest));
+    }
+
+     @Operation(summary = "Lista todas as publishers", 
+           description = "Devolve uma lista com todas as publishers registadas no banco de dados.")
+        @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de publishers devolvida com sucesso")
+    })
+    @GetMapping()
+    public ResponseEntity<List<PublisherResponse>> getAll(){
+        return ResponseEntity.status(HttpStatus.OK).body(publisherService.getAllPublisher());
     }
 
     @Operation(summary = "Busca uma Publisher por ID")
