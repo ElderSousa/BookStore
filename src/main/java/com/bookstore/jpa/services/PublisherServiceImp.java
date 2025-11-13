@@ -1,8 +1,8 @@
 package com.bookstore.jpa.services;
 
-import org.apache.commons.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.bookstore.jpa.Mappings.interfaces.PublisherMapper;
 import com.bookstore.jpa.dtos.records.Requests.PublisherResquest.PublisherCreateRequest;
@@ -11,6 +11,7 @@ import com.bookstore.jpa.models.PublisherModel;
 import com.bookstore.jpa.repositories.PublisherRepository;
 import com.bookstore.jpa.services.interfaces.PublisherService;
 
+@Service
 public class PublisherServiceImp implements PublisherService{
 
     private final PublisherRepository publisherRepository;
@@ -23,12 +24,12 @@ public class PublisherServiceImp implements PublisherService{
         this.publisherMapper = publisherMapper;
     }
 
+    @Override
     public PublisherResponse savePublisher(PublisherCreateRequest publisherRequest){
         log.info("Iniciando tentativa de salvar publisher como nome {}", publisherRequest.name());
 
         var publisher = new PublisherModel();
         publisher.setName(publisherRequest.name());
-        publisher.setBooks(publisherRequest.books());
 
         var savedPublisher = publisherRepository.save(publisher);
 
