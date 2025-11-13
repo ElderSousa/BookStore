@@ -1,5 +1,7 @@
 package com.bookstore.jpa.services;
 
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,10 @@ import com.bookstore.jpa.models.PublisherModel;
 import com.bookstore.jpa.repositories.PublisherRepository;
 import com.bookstore.jpa.services.interfaces.PublisherService;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
+@SuppressWarnings("null")
 public class PublisherServiceImp implements PublisherService{
 
     private final PublisherRepository publisherRepository;
@@ -37,4 +42,18 @@ public class PublisherServiceImp implements PublisherService{
 
         return publisherMapper.toDto(savedPublisher);
     }
+
+    @Override
+    public PublisherResponse getPublisherById(UUID id) {
+        log.info("Iniciando busca de Publisher com ID: {}", id);
+
+        var publisher = publisherRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Publisher com ID: " + id + " não encontrada"));
+        
+        log.info("Encontrado Publisher com o ID: {}", id);
+        
+        return publisherMapper.toDto(publisher);
+    }
+
+ 
 }

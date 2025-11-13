@@ -1,7 +1,12 @@
 package com.bookstore.jpa.controllers;
 
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,5 +43,16 @@ public class PublisherController {
     @PostMapping
     public ResponseEntity<PublisherResponse> savePublisher(@RequestBody @Valid PublisherCreateRequest publisherRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(publisherService.savePublisher(publisherRequest));
+    }
+
+    @Operation(summary = "Busca uma Publisher por ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Publisher encontrado com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Publihser não encontrado com o ID fornecido", 
+                     content = @Content(schema = @Schema(implementation = Map.class)))
+    })
+    @GetMapping("{id}")
+    public ResponseEntity<PublisherResponse> getPublisherById(@PathVariable UUID id){
+        return ResponseEntity.status(HttpStatus.OK).body(publisherService.getPublisherById(id));
     }
 }
