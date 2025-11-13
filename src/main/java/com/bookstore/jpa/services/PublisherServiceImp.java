@@ -1,6 +1,8 @@
 package com.bookstore.jpa.services;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,20 @@ public class PublisherServiceImp implements PublisherService{
         log.info("Publisher com ID: {} salvo com sucesso", savedPublisher.getId());
 
         return publisherMapper.toDto(savedPublisher);
+    }
+
+    @Override
+    public List<PublisherResponse> getAllPublisher(){
+        log.info("Iniando a busca por todas as Publishers...");
+
+        var publishers = publisherRepository.findAll();
+
+        log.info("Encontrado todas as Publishers {}", publishers.size());
+
+        return publishers
+        .stream()
+        .map(publisherMapper::toDto)
+        .collect(Collectors.toList());
     }
 
     @Override
