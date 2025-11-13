@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.bookstore.jpa.Mappings.interfaces.PublisherMapper;
 import com.bookstore.jpa.dtos.records.Requests.PublisherResquest.PublisherCreateRequest;
+import com.bookstore.jpa.dtos.records.Requests.PublisherResquest.PublisherUpdateRequest;
 import com.bookstore.jpa.dtos.records.Responses.PublisherResponse;
 import com.bookstore.jpa.models.PublisherModel;
 import com.bookstore.jpa.repositories.PublisherRepository;
@@ -71,5 +72,19 @@ public class PublisherServiceImp implements PublisherService{
         return publisherMapper.toDto(publisher);
     }
 
- 
+    @Override
+    public PublisherResponse updatePublisher(UUID id, PublisherUpdateRequest updateRequest){
+        log.info("Iniciando tentativa de autalizar publisher com o ID: {}", id);
+
+        var publisher = publisherRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Publisher com o ID: " + id + " não encontrada"));
+
+        publisher.setName(updateRequest.name());
+
+        var updatedPublisher = publisherRepository.save(publisher);
+
+        log.info("Publisher com o ID: {} salvo com sucesso", id);
+
+        return publisherMapper.toDto(updatedPublisher);
+    }
 }

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookstore.jpa.dtos.records.Requests.PublisherResquest.PublisherCreateRequest;
+import com.bookstore.jpa.dtos.records.Requests.PublisherResquest.PublisherUpdateRequest;
 import com.bookstore.jpa.dtos.records.Responses.PublisherResponse;
 import com.bookstore.jpa.services.interfaces.PublisherService;
 
@@ -62,8 +64,20 @@ public class PublisherController {
         @ApiResponse(responseCode = "404", description = "Publihser não encontrado com o ID fornecido", 
                      content = @Content(schema = @Schema(implementation = Map.class)))
     })
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<PublisherResponse> getPublisherById(@PathVariable UUID id){
         return ResponseEntity.status(HttpStatus.OK).body(publisherService.getPublisherById(id));
+    }
+
+    @Operation(summary = "Atualiza parcialmente uma publisher",
+               description = "Atualiza o 'nome'.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "publisher atualizada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Publisher não encontrada", 
+                     content = @Content(schema = @Schema(implementation = Map.class)))
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<PublisherResponse> updatePublisher(@PathVariable UUID id, @RequestBody @Valid PublisherUpdateRequest updateRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(publisherService.updatePublisher(id, updateRequest));
     }
 }
